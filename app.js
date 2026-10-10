@@ -25,11 +25,12 @@
   const byId = Object.fromEntries(allQs.map((q) => [q.id, q]));
 
   // ---------- estado ----------
-  let state = { answers: {}, who: { name: "", contact: "" }, authorize: {} };
+  let state = { answers: {}, who: { name: "", contact: "" }, authorize: {}, art: { rate: {}, fav: [], note: {} } };
   try {
     const raw = localStorage.getItem(CFG.STORAGE_KEY);
     if (raw) state = Object.assign(state, JSON.parse(raw));
   } catch (e) { /* sem armazenamento: segue em memória */ }
+  state.art = Object.assign({ rate: {}, fav: [], note: {} }, state.art || {});
   function save() { try { localStorage.setItem(CFG.STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
 
   const ans = (id) => state.answers[id] || {};
@@ -109,7 +110,7 @@
 
   function sectionProgress(s) {
     if (s.id === "M") return { done: Object.values(state.authorize).filter((a) => a.ok).length, total: 3 };
-    const qs = s.questions;
+    const qs = s.questions.filter((q) => !q.inTab);
     return { done: qs.filter(isAnswered).length, total: qs.length };
   }
 
@@ -118,7 +119,7 @@
     const first = !$("#sections").children.length;
     $("#sections").innerHTML = sections.map((s, i) => {
       const p = sectionProgress(s);
-      const qs = s.id === "M" ? [] : s.questions.slice().sort((a, b) => PRIO_ORDER[a.prio] - PRIO_ORDER[b.prio]);
+      const qs = s.id === "M" ? [] : s.questions.filter((q) => !q.inTab).slice().sort((a, b) => PRIO_ORDER[a.prio] - PRIO_ORDER[b.prio]);
       const isOpen = first ? i === 0 : open.has(s.id);
       return `<details class="sec" data-sec="${s.id}" ${isOpen ? "open" : ""}>
         <summary><span class="sec-title">${esc(s.title)}</span><span class="sec-prog" data-prog="${s.id}">${p.done}/${p.total}</span></summary>
@@ -204,6 +205,7 @@
     });
     const autorizacoes = Object.entries(state.authorize).filter(([, a]) => a.ok || a.contact).map(([k, a]) => ({ quem: k, autoriza: !!a.ok, contato: a.contact || "" }));
     const decisoes = deriveDecisions();
+    const arte = artSummary();
     const lines = items.map((i) => `${i.id} [${i.prioridade}] ${i.pergunta}\n  → ${[i.respostas.join("; "), i.texto, i.observacao ? "(obs: " + i.observacao + ")" : ""].filter(Boolean).join(" ")}`);
     return {
       _subject: "Levantamento Cofo Literário — " + (state.who.name || "sem nome"),
@@ -214,7 +216,7 @@
       progresso: `${items.length} de ${countable.length}`,
       pendentes_prioridade_alta: pendingBlock().map((q) => q.id),
       mensagem: lines.join("\n\n"),
-      respostas: items, autorizacoes, decisoes
+      respostas: items, autorizacoes, decisoes, arte
     };
   }
 
@@ -261,6 +263,7 @@
     const dec = p.decisoes.filter((d) => d.escolhas.length).map((d) => "- " + d.ramo + ": " + d.escolhas.join("; ")).join(NL);
     const aut = p.autorizacoes.map((x) => "- " + x.quem + ": " + (x.autoriza ? "autoriza" : "não autoriza") + " " + x.contato).join(NL);
     return [head, "", "=== RESPOSTAS ===", "", p.mensagem, "", "=== DECISÕES DO MAPA ===", dec || "(nenhuma ainda)",
+      "", "=== MARCA E MASCOTE ===", arteLines(p.arte).join(NL) || "(nada avaliado)",
       "", "=== AUTORIZAÇÕES ===", aut || "(nenhuma)", "", "=== DADOS (JSON) ===", JSON.stringify(p), ""].join(NL);
   }
 
@@ -313,6 +316,7 @@
       ${secHtml || "<p>Nenhuma pergunta respondida ainda.</p>"}
       ${pend.length ? `<h2>Ainda sem resposta (prioridade alta)</h2><ul>${pend.map((q) => `<li><strong>${esc(q.id)}</strong> ${esc(q.q)}</li>`).join("")}</ul>` : ""}
       ${dec.length ? `<h2>Decisões do mapa</h2><ul>${dec.map((d) => `<li><strong>${esc(d.ramo)}:</strong> ${d.escolhas.map(esc).join("; ")}</li>`).join("")}</ul>` : ""}
+      ${artPrintHtml(p.arte)}
       ${aut.length ? `<h2>Autorizações de contato</h2><ul>${aut.map((x) => `<li>${esc(x.quem)}: ${x.autoriza ? "autoriza" : "não autoriza"} ${esc(x.contato)}</li>`).join("")}</ul>` : ""}`;
     let root = $("#print-root");
     if (!root) { root = document.createElement("div"); root.id = "print-root"; document.body.appendChild(root); }
@@ -369,10 +373,153 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
+  // ---------- aba Marca e mascote ----------
+  const ART = (window.ART && window.ART.groups) || [];
+  const artItems = {};
+  ART.forEach((g) => g.items.forEach((it) => { artItems[it.id] = Object.assign({ group: g.id, groupTitle: g.title }, it); }));
+  const RATE_LABEL = { quero: "Quero", talvez: "Talvez", nao: "Não" };
+
+  function artSummary() {
+    const out = { favoritas: [], quero: [], talvez: [], nao: [], notas: {} };
+    out.favoritas = state.art.fav.filter((id) => artItems[id]);
+    Object.entries(state.art.rate).forEach(([id, r]) => { if (artItems[id] && out[r]) out[r].push(id); });
+    Object.entries(state.art.note).forEach(([id, n]) => { if (artItems[id] && n && n.trim()) out.notas[id] = n.trim(); });
+    return out;
+  }
+  const artName = (id) => (artItems[id] ? artItems[id].groupTitle + " — " + artItems[id].label : id);
+  function arteLines(a) {
+    if (!a) return [];
+    const L = [];
+    if (a.favoritas.length) L.push("FAVORITAS: " + a.favoritas.map((id) => id + " (" + artName(id) + ")").join("; "));
+    ["quero", "talvez", "nao"].forEach((r) => { if (a[r].length) L.push(RATE_LABEL[r].toUpperCase() + ": " + a[r].join(", ")); });
+    Object.entries(a.notas).forEach(([id, n]) => L.push("Nota em " + id + ": " + n));
+    return L;
+  }
+  function artPrintHtml(a) {
+    if (!a || !(a.favoritas.length || a.quero.length || a.talvez.length || a.nao.length)) return "";
+    const thumbs = a.favoritas.map((id) => `<figure class="pfig"><img src="${esc(artItems[id].src)}" alt=""><figcaption>${esc(id)} · ${esc(artName(id))}${a.notas[id] ? "<br>" + esc(a.notas[id]) : ""}</figcaption></figure>`).join("");
+    const list = (r) => (a[r].length ? `<p><strong>${RATE_LABEL[r]}:</strong> ${a[r].map(esc).join(", ")}</p>` : "");
+    return `<h2>Marca e mascote</h2>${thumbs ? `<div class="pfigs">${thumbs}</div>` : ""}${list("quero")}${list("talvez")}${list("nao")}`;
+  }
+
+  function cardHtml(it) {
+    const r = state.art.rate[it.id] || "";
+    const isFav = state.art.fav.includes(it.id);
+    const note = state.art.note[it.id] || "";
+    const btn = (v) => `<button type="button" class="rate r-${v} ${r === v ? "on" : ""}" data-item="${esc(it.id)}" data-rate="${v}" aria-pressed="${r === v}">${RATE_LABEL[v]}</button>`;
+    return `<figure class="acard ${r ? "r-" + r : ""}" data-art="${esc(it.id)}">
+      <button type="button" class="aimg" data-zoom="${esc(it.id)}" aria-label="Ampliar: ${esc(it.label)}"><img src="${esc(it.src)}" alt="${esc(it.label)}" loading="lazy"></button>
+      <figcaption>${esc(it.label)}</figcaption>
+      <div class="rates" role="group" aria-label="Sua opinião sobre ${esc(it.label)}">${btn("quero")}${btn("talvez")}${btn("nao")}</div>
+      <button type="button" class="favbtn ${isFav ? "on" : ""}" data-fav="${esc(it.id)}" aria-pressed="${isFav}">${isFav ? "★ Favorita" : "☆ Marcar como favorita"}</button>
+      <input type="text" class="anote" data-art-note="${esc(it.id)}" value="${esc(note)}" placeholder="Por quê? O que mudaria? (opcional)" aria-label="Comentário sobre ${esc(it.label)}">
+    </figure>`;
+  }
+
+  function renderFavs() {
+    const favs = state.art.fav.filter((id) => artItems[id]);
+    $("#marca-favs").innerHTML = `<div class="favbox"><strong>Minhas favoritas (${favs.length}/3)</strong>
+      ${favs.length ? `<div class="favlist">${favs.map((id) => `<button type="button" class="favthumb" data-fav="${esc(id)}" title="Remover das favoritas"><img src="${esc(artItems[id].src)}" alt="${esc(artItems[id].label)}"><span>${esc(id)} ✕</span></button>`).join("")}</div>` : '<p class="why">Toque em “Marcar como favorita” nas imagens de que mais gostou (até 3).</p>'}
+      <p id="fav-msg" class="err" role="status"></p></div>`;
+  }
+
+  function renderMarca() {
+    $("#marca-guide").innerHTML = allQs.filter((q) => q.inTab === "marca").map(renderQuestion).join("");
+    renderFavs();
+    const open = new Set($$("#marca-gallery details[open]").map((d) => d.dataset.g));
+    const first = !$("#marca-gallery").children.length;
+    $("#marca-gallery").innerHTML = ART.map((g, i) => {
+      const rated = g.items.filter((it) => state.art.rate[it.id]).length;
+      return `<details class="sec" data-g="${g.id}" ${(first ? i < 1 : open.has(g.id)) ? "open" : ""}>
+        <summary><span class="sec-title">${esc(g.title)}</span><span class="sec-prog" data-gprog="${g.id}">${rated}/${g.items.length}</span></summary>
+        <p class="intro">${esc(g.intro)}</p>
+        <div class="agrid">${g.items.map(cardHtml).join("")}</div>
+      </details>`;
+    }).join("");
+  }
+
+  function refreshCard(id) {
+    const el = $(`[data-art="${id}"]`);
+    if (!el) return;
+    const it = artItems[id], r = state.art.rate[id] || "", isFav = state.art.fav.includes(id);
+    el.className = "acard" + (r ? " r-" + r : "");
+    $$(".rate", el).forEach((b) => { const on = b.dataset.rate === r; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+    const fb = $(".favbtn", el);
+    fb.classList.toggle("on", isFav); fb.setAttribute("aria-pressed", String(isFav));
+    fb.textContent = isFav ? "★ Favorita" : "☆ Marcar como favorita";
+    const g = ART.find((x) => x.id === it.group), pc = $(`[data-gprog="${g.id}"]`);
+    if (pc) pc.textContent = `${g.items.filter((x) => state.art.rate[x.id]).length}/${g.items.length}`;
+  }
+
+  function artRate(id, v) {
+    state.art.rate[id] = state.art.rate[id] === v ? "" : v;      // tocar de novo desmarca
+    if (!state.art.rate[id]) delete state.art.rate[id];
+    save(); refreshCard(id);
+  }
+  function artFav(id) {
+    const i = state.art.fav.indexOf(id);
+    if (i >= 0) state.art.fav.splice(i, 1);
+    else if (state.art.fav.length >= 3) {
+      $("#fav-msg").textContent = "Você já tem 3 favoritas. Remova uma (toque nela acima) para escolher outra.";
+      return;
+    } else {
+      state.art.fav.push(id);
+      if (!state.art.rate[id]) state.art.rate[id] = "quero";    // favorita implica "Quero"
+    }
+    save(); renderFavs(); refreshCard(id);
+  }
+
+  // lightbox
+  let lb = { id: null, full: false };
+  function lbEl() {
+    let el = $("#lightbox");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "lightbox"; el.className = "lightbox"; el.hidden = true;
+      el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+      el.innerHTML = `<div class="lb-bar"><span id="lb-title"></span><span class="lb-actions">
+          <button type="button" data-lb-full>Ver folha inteira</button><button type="button" data-lb-close aria-label="Fechar">✕</button></span></div>
+        <button type="button" class="lb-nav prev" data-lb-nav="-1" aria-label="Anterior">‹</button>
+        <img id="lb-img" alt="">
+        <button type="button" class="lb-nav next" data-lb-nav="1" aria-label="Próxima">›</button>
+        <div class="lb-rates" id="lb-rates"></div>`;
+      document.body.appendChild(el);
+      el.addEventListener("click", (e) => { if (e.target === el) closeLightbox(); });
+    }
+    return el;
+  }
+  function renderLightbox() {
+    const it = artItems[lb.id]; if (!it) return;
+    const el = lbEl();
+    $("#lb-img", el).src = lb.full ? it.full : it.src;
+    $("#lb-img", el).alt = it.label;
+    $("#lb-title", el).textContent = it.groupTitle + " · " + it.label;
+    const r = state.art.rate[it.id] || "";
+    $("#lb-rates", el).innerHTML = ["quero", "talvez", "nao"].map((v) => `<button type="button" class="rate r-${v} ${r === v ? "on" : ""}" data-item="${esc(it.id)}" data-rate="${v}">${RATE_LABEL[v]}</button>`).join("");
+    $("[data-lb-full]", el).textContent = lb.full ? "Ver só esta" : "Ver folha inteira";
+  }
+  function openLightbox(id) { lb = { id, full: false }; lbEl().hidden = false; document.body.classList.add("lb-open"); renderLightbox(); }
+  function closeLightbox() { const el = $("#lightbox"); if (el) el.hidden = true; document.body.classList.remove("lb-open"); if (lb.id) refreshCard(lb.id); }
+  function lightboxNav(d) {
+    const it = artItems[lb.id], g = ART.find((x) => x.id === it.group);
+    const i = g.items.findIndex((x) => x.id === lb.id);
+    lb = { id: g.items[(i + d + g.items.length) % g.items.length].id, full: false };
+    renderLightbox();
+  }
+  function lightboxFull() { lb.full = !lb.full; renderLightbox(); }
+  document.addEventListener("keydown", (e) => {
+    const el = $("#lightbox");
+    if (!el || el.hidden) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") lightboxNav(-1);
+    if (e.key === "ArrowRight") lightboxNav(1);
+  });
+
   // ---------- eventos ----------
   function setTab(name) {
     $$(".tab").forEach((t) => (t.hidden = t.id !== "tab-" + name));
     $$(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+    if (name === "marca") renderMarca();
     if (name === "mapa") renderMap();
     if (name === "enviar") renderReview();
     window.scrollTo(0, 0);
@@ -399,6 +546,16 @@
       const el = $("#q-" + q.id); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    const rate = e.target.closest("[data-rate]");
+    if (rate) { artRate(rate.dataset.item, rate.dataset.rate); const lbx = $("#lightbox"); if (lbx && !lbx.hidden) renderLightbox(); return; }
+    const fav = e.target.closest("[data-fav]");
+    if (fav) return artFav(fav.dataset.fav);
+    const zoom = e.target.closest("[data-zoom]");
+    if (zoom) return openLightbox(zoom.dataset.zoom);
+    if (e.target.closest("[data-lb-close]")) return closeLightbox();
+    const lbnav = e.target.closest("[data-lb-nav]");
+    if (lbnav) return lightboxNav(Number(lbnav.dataset.lbNav));
+    if (e.target.closest("[data-lb-full]")) return lightboxFull();
     if (e.target.id === "btn-wpp") return shareWhatsApp();
     if (e.target.id === "btn-mail") return shareEmail();
     if (e.target.id === "btn-send") return send();
@@ -425,6 +582,9 @@
   document.addEventListener("input", (e) => {
     const t = e.target;
     const art = t.closest("[data-q]");
+    if (t.dataset.artNote) {
+      state.art.note[t.dataset.artNote] = t.value; save(); return;
+    }
     if (art && t.dataset.field) {
       const qid = art.dataset.q, a = (state.answers[qid] = state.answers[qid] || {});
       a[t.dataset.field] = t.value; save(); refreshQuestion(qid); return;

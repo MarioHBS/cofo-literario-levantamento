@@ -21,6 +21,7 @@
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="perguntas" aria-selected="true">Perguntas</button>
+    <button role="tab" data-tab="marca" aria-selected="false">Marca e mascote</button>
     <button role="tab" data-tab="mapa" aria-selected="false">Mapa de decisões</button>
     <button role="tab" data-tab="enviar" aria-selected="false">Revisar e enviar</button>
   </nav>
@@ -38,6 +39,17 @@
       <details class="known"><summary>O que eu já sei sobre você</summary><ul id="known-list"></ul></details>
     </div>
     <div id="sections"></div>
+  </section>
+
+  <section id="tab-marca" class="tab" hidden>
+    <div class="welcome">
+      <h2>Marca e mascote</h2>
+      <p>Veja as opções de logo e de personagem e diga do que <strong>gosta</strong>. Marque <em>Quero</em>, <em>Talvez</em> ou <em>Não</em>, escolha até <strong>3 favoritas</strong> e, se quiser, escreva o que mudaria. Não precisa acertar: é para eu entender o seu gosto.</p>
+      <p class="legend">Toque na imagem para ampliar.</p>
+    </div>
+    <div id="marca-guide"></div>
+    <div id="marca-favs"></div>
+    <div id="marca-gallery"></div>
   </section>
 
   <section id="tab-mapa" class="tab" hidden>
@@ -62,6 +74,7 @@
 <script src="questions.js"></script>
 <script src="options.js"></script>
 <script src="decisions.js"></script>
+<script src="arte.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

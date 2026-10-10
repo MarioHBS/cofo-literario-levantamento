@@ -122,3 +122,46 @@ textarea:focus,input:focus,button:focus-visible,summary:focus-visible{outline:3p
   #print-root .pq-q{margin:0;color:#333}
   #print-root .pq-a{margin:2pt 0 0;padding-left:10pt;border-left:3px solid #999;font-weight:600}
 }
+
+/* ---- aba Marca e mascote ---- */
+.err{color:var(--err);margin:.3em 0 0;min-height:1em}
+.tabs{overflow-x:auto}
+.tabs button{white-space:nowrap}
+.favbox{position:sticky;top:112px;z-index:3;background:var(--card);border:1.5px solid var(--brand);border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.favlist{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.favthumb{border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;min-height:48px}
+.favthumb img{width:84px;height:68px;object-fit:contain;background:#fff;border-radius:6px}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;padding:12px 16px 16px}
+.acard{margin:0;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:8px;display:flex;flex-direction:column;gap:6px}
+.acard.r-quero{border-color:var(--ok)}
+.acard.r-talvez{border-color:#d19a1a}
+.acard.r-nao{border-color:var(--err);opacity:.75}
+.aimg{border:0;background:#fff;border-radius:10px;padding:0;cursor:zoom-in;display:block}
+.aimg img{width:100%;aspect-ratio:640/520;object-fit:contain;display:block;border-radius:10px}
+.acard figcaption{font-size:.85rem;font-weight:600}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rate{font:inherit;font-size:.85rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;min-height:44px;cursor:pointer}
+.rate.on.r-quero{background:var(--ok);border-color:var(--ok);color:#fff}
+.rate.on.r-talvez{background:#d19a1a;border-color:#d19a1a;color:#fff}
+.rate.on.r-nao{background:var(--err);border-color:var(--err);color:#fff}
+.favbtn{font:inherit;font-size:.85rem;border:1.5px dashed var(--brand);background:var(--card);color:var(--brand-d);border-radius:10px;min-height:44px;cursor:pointer}
+.favbtn.on{background:var(--peach);border-style:solid;font-weight:700}
+.anote{font-size:.85rem;padding:8px 10px}
+body.lb-open{overflow:hidden}
+.lightbox{position:fixed;inset:0;z-index:50;background:rgba(20,12,6,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:56px 12px 84px}
+.lightbox[hidden]{display:none}
+.lightbox img{max-width:min(100%,1200px);max-height:100%;object-fit:contain;background:#fff;border-radius:10px;touch-action:pinch-zoom}
+.lb-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 12px;color:#fff;font-size:.9rem}
+.lb-bar button,.lb-nav{font:inherit;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);border-radius:10px;min-height:44px;min-width:44px;padding:0 12px;cursor:pointer}
+.lb-actions{display:flex;gap:8px}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);font-size:1.6rem}
+.lb-nav.prev{left:8px}.lb-nav.next{right:8px}
+.lb-rates{position:absolute;bottom:12px;display:flex;gap:8px}
+.lb-rates .rate{min-width:96px}
+@media (max-width:560px){.agrid{grid-template-columns:repeat(2,1fr);padding:10px}.favbox{top:98px}.favthumb img{width:64px;height:52px}}
+@media print{
+  #print-root .pfigs{display:flex;flex-wrap:wrap;gap:10pt}
+  #print-root .pfig{margin:0;width:46%;break-inside:avoid}
+  #print-root .pfig img{width:100%;border:1px solid #999}
+  #print-root .pfig figcaption{font-size:9pt}
+}

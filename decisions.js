@@ -126,13 +126,21 @@ window.DECISIONS = [
     ]
   },
   {
-    id: "marca", title: "Marca e requisitos legais", qs: ["G1", "G2", "F1", "L2", "M2"],
+    id: "marca", title: "Marca e requisitos legais", qs: ["G10", "G11", "G12", "G1", "G2", "F1", "L2", "M2"],
     ask: "O que precisa estar certo antes de publicar?",
     options: [
       { id: "logo_nova", label: "Logo/identidade nova", when: { G1: ["nova"] },
         gain: "Identidade própria e registrável.", cost: "Tempo de design e aprovação; retrabalho no site.", phase: "MVP", effort: "M" },
       { id: "logo_atual", label: "Partir do cofo atual", when: { G1: ["atual", "refinar"] },
         gain: "Continuidade visual; mais rápido.", cost: "Se for arte de IA, pode não ter proteção autoral.", phase: "MVP", effort: "P" },
+      { id: "mascote_manter", label: "Manter o mascote (como está ou simplificado)", when: { G11: ["manter", "simplificar"], G12: ["mascote"] },
+        gain: "Personagem forte para crianças, redes e produtos (quebra-cabeças).", cost: "Arte original sem registro: conferir autoria e registrar como marca mista; mais peças de arte.", phase: "MVP", effort: "M", rec: "Registro da marca mista (INPI)" },
+      { id: "mascote_sem", label: "Sem mascote: cofo e/ou nome", when: { G11: ["sem"], G12: ["cofo", "nome"] },
+        gain: "Visual mais simples e sóbrio; menos arte e menos risco de direitos.", cost: "Perde o apelo infantil e o personagem para as redes.", phase: "MVP", effort: "P" },
+      { id: "dir_institucional", label: "Direção editorial/institucional", when: { G10: ["editorial", "organico"] },
+        gain: "Credibilidade com escolas, secretarias e pais.", cost: "Menos lúdico para as crianças.", phase: "MVP", effort: "P" },
+      { id: "dir_infantil", label: "Direção lúdica/artesanal", when: { G10: ["ludica", "artesanal"] },
+        gain: "Fala direto com crianças e professores; combina com a cultura do cofo.", cost: "Exige cuidado para manter a seriedade em documentos e propostas.", phase: "MVP", effort: "P" },
       { id: "cnpj", label: "CNPJ ativo para vender", when: { F1: ["mei", "me"] },
         gain: "Gateway e nota fiscal viáveis.", cost: "Marca em nome da pessoa física: formalizar uso.", phase: "MVP", effort: "P" },
       { id: "sem_cnpj", label: "Sem CNPJ", when: { F1: ["nao"] },

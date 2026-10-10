@@ -228,6 +228,14 @@
 
   // Novas perguntas (não vieram do docx). `after` indica a pergunta que ela deve seguir na seção.
   window.NEW_QUESTIONS = [
+    { sec: "G", after: "G9", inTab: "marca", id: "G10", q: "Qual destas direções mais combina com você e com o seu público?", why: "Define o estilo geral de logo, cores e tipografia", prio: "Bloqueia", ans: "",
+      t: "choice", o: [["artesanal", "Artesanal e acolhedora", "Visual de cesto, texturas feitas à mão e cores terrosas."], ["ludica", "Lúdica e infantil", "Cores fortes e mascote em destaque: fala direto com crianças."], ["editorial", "Editorial e institucional", "Sóbrio e clássico: passa credibilidade a escolas e secretarias."], ["organico", "Moderno orgânico", "Linhas limpas com calor artesanal."], ["nao_sei", "Ainda não sei"]] },
+    { sec: "G", after: "G10", inTab: "marca", id: "G11", q: "O que você quer fazer com o personagem (mascote)?", why: "Mascote é arte original que ainda não está registrada", prio: "Bloqueia", ans: "",
+      t: "choice", o: [["manter", "Manter o personagem como está", "Mascote aparece no site e nos materiais; vale conferir autoria e registrar a marca mista."], ["simplificar", "Manter, mas simplificado", "Mascote menor e mais limpo; funciona melhor em tamanho pequeno."], ["sem", "Sem personagem: só o cofo", "Menos arte para produzir e menos risco de direitos."], ["nao_sei", "Ainda não sei"]] },
+    { sec: "G", after: "G11", inTab: "marca", id: "G12", q: "Qual deve ser a cara principal da marca no site?", why: "Decide o que vai no topo do site e nas redes", prio: "Importante", ans: "",
+      t: "choice", o: [["mascote", "O mascote com o nome"], ["cofo", "O cesto (cofo) com livros e o nome"], ["nome", "Só o nome, em letras"], ["nao_sei", "Ainda não sei"]] },
+    { sec: "G", after: "G12", inTab: "marca", id: "G13", q: "O que não pode mudar de jeito nenhum na marca?", why: "Limites para o trabalho de design", prio: "Importante", ans: "" },
+    { sec: "G", after: "G13", inTab: "marca", id: "G14", q: "Outras ideias, cores ou referências que você gostaria de ver?", why: "Sugestões livres", prio: "Depois", ans: "" },
     { sec: "O", after: "O2", id: "O21", q: "Quando alguém ler um texto seu, o que você quer que aconteça depois?", why: "Ligação do texto livre com o resto do site", prio: "Importante", ans: "",
       t: "multi", o: [["catalogo", "Ver livros e sequências relacionados"], ["newsletter", "Deixar o e-mail para receber novidades"], ["compartilhar", "Compartilhar nas redes"], ["nada", "Nada, só ler"]] },
     { sec: "O", after: "O12", id: "O22", q: "Se houver curtidas, devem aparecer no texto, só para você, ou em um ranking dos mais curtidos?", why: "Prova social vs. privacidade", prio: "Depois", ans: "",
