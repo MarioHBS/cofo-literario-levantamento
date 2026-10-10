@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Levantamento — Cofo Literário</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div>
+      <h1>Cofo Literário</h1>
+      <p class="sub">Vamos montar o seu site juntas</p>
+    </div>
+    <div class="overall" aria-live="polite">
+      <div class="bar"><span id="overall-bar"></span></div>
+      <small id="overall-label">0% respondido</small>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="perguntas" aria-selected="true">Perguntas</button>
+    <button role="tab" data-tab="mapa" aria-selected="false">Mapa de decisões</button>
+    <button role="tab" data-tab="enviar" aria-selected="false">Revisar e enviar</button>
+  </nav>
+</header>
+
+<main>
+  <section id="tab-perguntas" class="tab">
+    <div class="welcome">
+      <h2>Oi, Martha!</h2>
+      <p>Estas perguntas ajudam a definir o seu site. A maioria é só <strong>marcar uma opção</strong>. Se nenhuma servir, escreva no campo abaixo da pergunta. Não precisa responder tudo de uma vez: <strong>suas respostas ficam salvas neste aparelho</strong>, e você pode voltar quando quiser.</p>
+      <p class="legend">
+        <span class="badge b-bloqueia">Prioridade</span> mostra o que eu preciso saber primeiro.
+        Pode deixar em branco o que não souber e marcar <em>“Ainda não sei”</em>.
+      </p>
+      <details class="known"><summary>O que eu já sei sobre você</summary><ul id="known-list"></ul></details>
+    </div>
+    <div id="sections"></div>
+  </section>
+
+  <section id="tab-mapa" class="tab" hidden>
+    <div class="welcome">
+      <h2>Mapa de decisões</h2>
+      <p>Cada escolha muda o que o site faz, o quanto custa e o quanto demora. Aqui você vê, para cada decisão, <strong>o que se ganha</strong> e <strong>o que se abre mão</strong>. O caminho que você marcou nas perguntas aparece destacado.</p>
+    </div>
+    <div id="map-summary"></div>
+    <div id="map"></div>
+  </section>
+
+  <section id="tab-enviar" class="tab" hidden>
+    <div class="welcome">
+      <h2>Revisar e enviar</h2>
+      <p>Quando terminar, envie. Ao enviar, suas respostas chegam ao Mário pelo WhatsApp ou por e-mail, como preferir. Você pode enviar de novo depois, se mudar de ideia: vale a última.</p>
+    </div>
+    <div id="review"></div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="questions.js"></script>
+<script src="options.js"></script>
+<script src="decisions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
